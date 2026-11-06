@@ -1,45 +1,69 @@
 const service = require('../services/treinosService.js');
+const authController = require('./authController.js');
 
 function listar(req, res) {
-    res.status(200).json(service.listarTodos());
+  const minimo = req.query.minimo !== undefined ? Number(req.query.minimo) : undefined;
+  const busca = req.query.busca;
+  const treinos = service.listarTodos(minimo, busca);
+  res.status(200).json(treinos);
+}
+
+function resumo(req, res) {
+  const dadosResumo = service.obterResumo();
+  res.status(200).json(dadosResumo);
 }
 
 function buscarUm(req, res) {
-    const id = Number(req.params.id);
-    const treino = service.buscarPorId(id);
-    if (treino === undefined) {
-        return res.status(404).json({ erro: 'Treino nao encontrado.' });
-    }
-    res.status(200).json(treino);
+  const id = Number(req.params.id);
+  if (isNaN(id) || !Number.isInteger(id)) {
+    return res.status(400).json({ erro: 'ID invalido.' });
+  }
+  const treino = service.buscarPorId(id);
+  if (treino === undefined) {
+    return res.status(404).json({ erro: 'Treino nao encontrado.' });
+  }
+  res.status(200).json(treino);
 }
 
 function criar(req, res) {
-    const resultado = service.criarTreino(req.body);
-    if (resultado.erro !== undefined) {
-        return res.status(400).json({ erro: resultado.erro });
-    }
-    res.status(201).json(resultado.treino);
+  // Exercício 18: Rota protegida exige autenticação
+  const usuarioLogado = authController.usuarioDaRequisicao(req);
+  if (usuarioLogado === null) {
+    return res.status(401).json({ erro: 'Faca login primeiro.' });
+  }
+
+  const resultado = service.criarTreino(req.body);
+  if (resultado.erro !== undefined) {
+    return res.status(400).json({ erro: resultado.erro });
+  }
+  res.status(201).json(resultado.treino);
 }
 
 function atualizar(req, res) {
-    const id = Number(req.params.id);
-    const resultado = service.atualizarTreino(id, req.body);
-    if (resultado.naoEncontrado === true) {
-        return res.status(404).json({ erro: 'Treino nao encontrado.' });
-    }
-    if (resultado.erro !== undefined) {
-        return res.status(400).json({ erro: resultado.erro });
-    }
-    res.status(200).json(resultado.treino);
+  const id = Number(req.params.id);
+  if (isNaN(id) || !Number.isInteger(id)) {
+    return res.status(400).json({ erro: 'ID invalido.' });
+  }
+  const resultado = service.atualizarTreino(id, req.body);
+  if (resultado.naoEncontrado === true) {
+    return res.status(404).json({ erro: 'Treino nao encontrado.' });
+  }
+  if (resultado.erro !== undefined) {
+    return res.status(400).json({ erro: resultado.erro });
+  }
+  res.status(200).json(resultado.treino);
 }
 
 function remover(req, res) {
-    const id = Number(req.params.id);
-    const resultado = service.removerTreino(id);
-    if (resultado.naoEncontrado === true) {
-        return res.status(404).json({ erro: 'Treino nao encontrado.' });
-    }
-    res.status(204).end();
+  const id = Number(req.params.id);
+  if (isNaN(id) || !Number.isInteger(id)) {
+    return res.status(400).json({ erro: 'ID invalido.' });
+  }
+  const resultado = service.removerTreino(id);
+  if (resultado.naoEncontrado === true) {
+    return res.status(404).json({ erro: 'Treino nao encontrado.' });
+  }
+  res.status(204).end();
 }
 
-module.exports = { listar, buscarUm, criar, atualizar, remover };
+module.exports = { listar, resumo, buscarUm, criar, atualizar, remover };
