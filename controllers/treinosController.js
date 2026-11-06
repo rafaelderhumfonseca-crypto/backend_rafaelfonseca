@@ -22,7 +22,6 @@ function buscarUm(req, res) {
 }
 
 function criar(req, res) {
-  // A rota volta a ser pública para respeitar o contrato original da API
   const resultado = service.criarTreino(req.body);
   if (resultado.erro !== undefined) {
     return res.status(400).json({ erro: resultado.erro });
