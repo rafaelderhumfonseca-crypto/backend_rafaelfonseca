@@ -21,10 +21,11 @@ function usuarioDaRequisicao(req) {
   return usuariosRepository.buscarPorId(id);
 }
 
-function login(req, res) {
+async function login(req, res) {
   const usuario = (req.body.usuario ?? '').trim();
   const senha = req.body.senha ?? '';
-  const resultado = service.login(usuario, senha);
+  
+  const resultado = await service.login(usuario, senha);
 
   if (resultado.invalido === true) {
     return res.status(401).json({ erro: 'Usuario ou senha invalidos.' });
