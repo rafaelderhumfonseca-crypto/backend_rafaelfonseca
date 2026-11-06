@@ -1,14 +1,24 @@
 const express = require('express');
-const controller = require('./controllers/treinosController.js');
+const treinosController = require('./controllers/treinosController.js');
+const authController = require('./controllers/authController.js');
 
 const app = express();
 app.use(express.json());
 
-app.get('/treinos', controller.listar);
-app.get('/treinos/:id', controller.buscarUm);
-app.post('/treinos', controller.criar);
-app.put('/treinos/:id', controller.atualizar);
-app.delete('/treinos/:id', controller.remover);
+// Rotas estáticas/específicas (Aula 03)
+app.get('/treinos/resumo', treinosController.resumo);
+
+// CRUD de treinos (Aula 04 e Exercício 18)
+app.get('/treinos', treinosController.listar);
+app.get('/treinos/:id', treinosController.buscarUm);
+app.post('/treinos', treinosController.criar);
+app.put('/treinos/:id', treinosController.atualizar);
+app.delete('/treinos/:id', treinosController.remover);
+
+// Autenticação (Aula 05)
+app.post('/login', authController.login);
+app.get('/perfil', authController.perfil);
+app.post('/logout', authController.logout);
 
 const PORTA = 3000;
 app.listen(PORTA, () => {
