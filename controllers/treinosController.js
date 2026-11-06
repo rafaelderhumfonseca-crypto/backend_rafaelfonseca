@@ -1,5 +1,4 @@
 const service = require('../services/treinosService.js');
-const authController = require('./authController.js');
 
 function listar(req, res) {
   const minimo = req.query.minimo !== undefined ? Number(req.query.minimo) : undefined;
@@ -15,9 +14,6 @@ function resumo(req, res) {
 
 function buscarUm(req, res) {
   const id = Number(req.params.id);
-  if (isNaN(id) || !Number.isInteger(id)) {
-    return res.status(400).json({ erro: 'ID invalido.' });
-  }
   const treino = service.buscarPorId(id);
   if (treino === undefined) {
     return res.status(404).json({ erro: 'Treino nao encontrado.' });
@@ -26,12 +22,7 @@ function buscarUm(req, res) {
 }
 
 function criar(req, res) {
-  // Exercício 18: Rota protegida exige autenticação
-  const usuarioLogado = authController.usuarioDaRequisicao(req);
-  if (usuarioLogado === null) {
-    return res.status(401).json({ erro: 'Faca login primeiro.' });
-  }
-
+  // A rota volta a ser pública para respeitar o contrato original da API
   const resultado = service.criarTreino(req.body);
   if (resultado.erro !== undefined) {
     return res.status(400).json({ erro: resultado.erro });
@@ -41,9 +32,6 @@ function criar(req, res) {
 
 function atualizar(req, res) {
   const id = Number(req.params.id);
-  if (isNaN(id) || !Number.isInteger(id)) {
-    return res.status(400).json({ erro: 'ID invalido.' });
-  }
   const resultado = service.atualizarTreino(id, req.body);
   if (resultado.naoEncontrado === true) {
     return res.status(404).json({ erro: 'Treino nao encontrado.' });
@@ -56,9 +44,6 @@ function atualizar(req, res) {
 
 function remover(req, res) {
   const id = Number(req.params.id);
-  if (isNaN(id) || !Number.isInteger(id)) {
-    return res.status(400).json({ erro: 'ID invalido.' });
-  }
   const resultado = service.removerTreino(id);
   if (resultado.naoEncontrado === true) {
     return res.status(404).json({ erro: 'Treino nao encontrado.' });
